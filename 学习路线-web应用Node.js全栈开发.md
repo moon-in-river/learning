@@ -75,6 +75,9 @@ Sass
 看书顺序：
 
 - 《深入浅出 Node.js》（朴灵，偏原理）
+- 《Node.js 企业级应用开发实战》
+- 《全栈开发实战：使用 Node.js、React 和 MongoDB》
+- 《Node.js 设计模式》（进阶）
 
 ## 2. 后端框架
 
@@ -84,9 +87,9 @@ Sass
 推荐学习 Express（生态更丰富）
 视频顺序：
 
-- B 站【Express 框架实战】链接
-- 【全栈之巅】Node.js + Vue 全栈开发   链接
-- 【Node.js+Express+MongoDB 实战】链接
+- B 站【Express 框架实战】
+- 【全栈之巅】Node.js + Vue 全栈开发
+- 【Nodejs+Express+MongoDB 实战】
 
 ### NestJS（企业级框架，可选）：
 
@@ -96,9 +99,6 @@ Sass
 
 看书顺序：
 
-- 《Node.js 企业级应用开发实战》
-- 《全栈开发实战：使用 Node.js、React 和 MongoDB》
-- 《Node.js 设计模式》（进阶）
 
 ## 3. 数据库
 

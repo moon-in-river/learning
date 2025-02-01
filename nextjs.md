@@ -11,7 +11,7 @@
 - 实战篇，至少写出第一个实战项目 React Notes
 - 源码篇，了解实现原理
 
-# 路由模式
+# 路由篇
 
 ## App 路由
 
@@ -62,12 +62,12 @@ useRouter() hook。注意使用该 hook 需要在客户端组件中。
 
 ## 动态路由
 
-- [folderName]
-- 将文件夹的名字用方括号括住。这个路由的名字会作为 params prop 传给布局、 页面、 路由处理程序 以及 generateMetadata 函数。
-- [...folderName]
-- 在方括号内添加省略号，表示捕获所有后面所有的路由片段。
-- [[...folderName]]
-- 在双方括号内添加省略号，表示可选的捕获所有后面所有的路由片段。与上一种的区别就在于，不带参数的路由也会被匹配（就比如 /shop）
+- [folderName]  
+  将文件夹的名字用方括号括住。这个路由的名字会作为 params prop 传给布局、 页面、 路由处理程序 以及 generateMetadata 函数。
+- [...folderName]  
+  在方括号内添加省略号，表示捕获所有后面所有的路由片段。
+- [[...folderName]]  
+  在双方括号内添加省略号，表示可选的捕获所有后面所有的路由片段。与上一种的区别就在于，不带参数的路由也会被匹配（就比如 /shop）
 
 ## 路由组
 
@@ -86,8 +86,12 @@ useRouter() hook。注意使用该 hook 需要在客户端组件中。
 平行路由可以让你为每个路由定义独立的错误处理和加载界面。  
 平行路由内可以添加子页面，并且跟路由组一样，不会影响 URL。
 
-硬导航（Hard Navigation，比如浏览器刷新页面），因为 Next.js 无法确定与当前 URL 不匹配的插槽的状态，所以会渲染 404 错误。  
-访问 /visitors 本身就会造成插槽内容与当前 URL 不匹配。当读取路由时会去根路由、平行路由下读取，尽管这些路由可能没有目标 url，nextjs 没法确定哪个路由返回的结果是正确的。  
+硬导航（Hard Navigation，比如浏览器刷新页面），因为 Next.js 无法确定与当前 URL 不匹配的插槽的状态，所以会渲染 404 错误。
+
+访问 /visitors 本身就会造成插槽内容与当前 URL 不匹配。
+
+当读取路由时会去根路由、平行路由下读取，尽管这些路由可能没有目标 url，nextjs 没法确定哪个路由返回的结果是正确的。
+
 为了解决这个问题，Next.js 提供了 default.js。当发生硬导航的时候，Next.js 会为不匹配的插槽呈现 default.js 中定义的内容，如果 default.js 没有定义，再渲染 404 错误。
 
 ## 拦截路由
@@ -95,9 +99,142 @@ useRouter() hook。注意使用该 hook 需要在客户端组件中。
 拦截路由允许你在当前路由拦截其他路由地址并在当前路由中展示内容。
 
 在命名文件夹的时候以 (..) 开头，其中：
+
 - (.) 表示匹配同一层级
 - (..) 表示匹配上一层级
 - (..)(..) 表示匹配上上层级。
 - (...) 表示匹配根目录
 
-但是要注意的是，这个匹配的是路由的层级而不是文件夹路径的层级，就比如路由组、平行路由这些不会影响 URL 的文件夹就不会被计算层级。
+> 但是要注意的是，这个匹配的是路由的层级而不是文件夹路径的层级，就比如路由组、平行路由这些不会影响 URL 的文件夹就不会被计算层级。
+
+## 路由处理程序
+
+使用 Web Request 和 Response API 对于给定的路由自定义处理逻辑。  
+对于前后端分离架构，客户端与服务端之间通过 API 接口来交互。这个“API 接口”在 Next.js 中有个更为正式的称呼，就是路由处理程序。nextjs 也能提供接口，以往都是后端服务提供。
+
+### 定义路由处理程序
+
+定义一个名为 route.js 的特殊文件。
+
+该文件必须在 app 目录下，可以在 app 嵌套的文件夹下，
+
+> 但是要注意 page.js 和 route.js 不能在同一层级同时存在。因为一个路由不能是页面，还是 api 接口。
+
+使用 next/server 的 NextResponse 对象用于设置响应内容，但这里不一定非要用 NextResponse，直接使用 Response 也是可以的
+
+> 但在实际开发中，推荐使用 NextResponse，因为它是 Next.js 基于 Response 的封装，对 TypeScript 更加友好，同时提供了更为方便的用法，比如获取 Cookie 等。
+
+### 不支持的方法会返回 405
+
+支持 GET、POST、PUT、PATCH、DELETE、HEAD 和 OPTIONS 这些 HTTP 请求方法。
+
+### 入参
+
+请求方法会被传入 2 个参数，request、context。
+
+### 缓存行为
+
+默认情况下，使用 Response 对象（NextResponse 也是一样的）的 GET 请求会被缓存。
+
+以下行为会退出缓存：
+
+- GET 请求钟使用 Request 对象
+- 除了 GET 方法，还添加其他 HTTP 方法，比如 POST。  
+  因为 POST 请求往往用于改变数据，表示数据会发生变化，此时不适合缓存。
+- 使用像 cookies、headers 这样的动态函数。  
+  因为 cookies、headers 这些数据只有当请求的时候才知道具体的值。
+- 路由段配置项手动声明为动态模式
+  ```ts
+  export const dynamic = "force-dynamic";
+  ```
+
+触发更新的 2 种方式。
+
+- 使用路由段配置项。超过 revalidate 设置时间的首次访问会触发缓存更新，如果更新成功，后续的返回就都是新的内容，直到下一次触发缓存更新。
+  ```ts
+  export const revalidate = 10;
+  ```
+- 使用 fetch 请求的 next.revalidate 选项。效果和上一项一致。
+
+### 写接口常见问题
+
+#### 获取网址参数
+
+```ts
+// app/api/search/route.js
+// 访问 /api/search?query=hello
+export function GET(request) {
+  const searchParams = request.nextUrl.searchParams;
+  const query = searchParams.get("query"); // query
+}
+```
+
+#### 处理 Cookie
+
+读取 Cookie
+
+```ts
+request.cookies.get("token");
+```
+
+设置 Cookie
+
+```ts
+import { cookies } from "next/headers";
+... 其他代码
+const cookieStore = cookies();
+return new Response("Hello, Next.js!", {
+  status: 200,
+  headers: { "Set-Cookie": `token=${token}` },
+});
+... 其他代码
+```
+
+#### 重定向
+
+重定向使用 next/navigation 提供的 redirect 方法
+
+#### 获取请求体内容
+
+#### 设置 CORS
+
+#### Streaming
+
+```ts
+import { OpenAIStream, StreamingTextResponse } from "ai";
+```
+
+也可以直接使用底层的 Web API ReadableStream 实现 Streaming。
+
+## 中间件
+
+使用中间件，你可以拦截并控制应用里的所有请求和响应。
+
+在项目的根目录定义一个名为 middleware.js 的文件。需要具名导出一个 middleware 函数，一个 config 对象。
+
+> 注意：这里说的项目根目录指的是和 pages 或 app 同级。但如果项目用了 src 目录，则放在 src 下。
+
+在 middleware 函数中设置中间件的逻辑，在 config 对象中设置中间件的配置。
+
+### 设置匹配路径
+
+有两种方式可以指定中间件匹配的路径。
+
+- config.matcher。支持字符串形式，也支持数组形式。
+- 使用条件语句，if 判断 url。
+
+**:path\*** 用法来自于 path-to-regexp ,作用就是将 /user/:name 这样的路径字符串转换为正则表达式。
+
+通过在参数名前加一个冒号来定义命名参数（Named Parameters）。比如 /about/:path 匹配 /about/a 和 /about/b，但是不匹配 /about/a/c。
+
+> 实际测试的时候，/about/:path 并不能匹配 /about/xxx，只能匹配 /about，如果要匹配 /about/xxx，需要写成 /about/:path/
+>
+> 注意，路径必须以 /开头。matcher 的值必须是常量，这样可以在构建的时候被静态分析。使用变量之类的动态值会被忽略。
+
+config.matcher 还可以判断查询参数、cookies、headers。
+
+### 中间件逻辑
+
+如何读取和设置 cookies ？
+如何读取 headers ？
+如何直接响应?
