@@ -238,3 +238,68 @@ config.matcher 还可以判断查询参数、cookies、headers。
 如何读取和设置 cookies ？
 如何读取 headers ？
 如何直接响应?
+
+### 执行顺序
+
+在 Next.js 中，有很多地方都可以设置路由的响应，比如 next.config.js 中可以设置，中间件中可以设置，具体的路由中可以设置，所以要注意它们的执行顺序：
+
+1. headers（next.config.js）
+2. redirects（next.config.js）
+3. 中间件 (rewrites, redirects 等)
+4. beforeFiles (next.config.js 中的 rewrites)
+5. 基于文件系统的路由 (public/, \_next/static/, pages/, app/ 等)
+6. afterFiles (next.config.js 中的 rewrites)
+7. 动态路由 (/blog/[slug])
+8. fallback 中的 (next.config.js 中的 rewrites)
+
+注： beforeFiles 顾名思义，在基于文件系统的路由之前，afterFiles 顾名思义，在基于文件系统的路由之后，fallback 顾名思义，垫底执行。
+
+### 运行时
+
+写 Middleware 的时候，尽可能使用 Web API，避免使用 Node.js API。
+
+### 中间件的代码维护
+
+借助高阶函数。
+
+# 渲染篇
+
+## 基本概念
+
+- 客户端渲染。浏览器会先下载一个非常小的 HTML 文件和所需的 JavaScript 文件。在 JavaScript 中执行发送请求、获取数据、更新 DOM 和渲染页面等操作。
+
+最大的问题就是不够快。（SEO 问题是其次，现在的爬虫已经普遍能够支持 CSR 渲染的页面）
+
+在页面中使用 React useEffect hook。或者在客户端使用数据获取的库比如 SWR（也是 Next.js 团队开发的）或 TanStack Query。
+
+- 服务端渲染。由服务端直接请求接口、获取数据，然后渲染成静态的 HTML 文件返回给用户。总的速度比较快，也就是首屏渲染事件。但是 TTFB（Time to First Byte）相对较长。
+
+使用 SSR，你需要导出一个名为 getServerSideProps 的 async 函数。这个函数会在每次请求的时候被调用。返回的数据会通过组件的 props 属性传递给组件。
+
+- 静态站点生成。在获取数据之前，提前编译出 html，用户访问的时候直接返回。速度更快。  
+  当不获取数据时，默认使用的就是 SSG。如果需要获取数据，使用 getStaticProps，getStaticProps 会在构建的时候被调用，并将数据通过 props 属性传递给页面。第二种方式是使用 getStaticPaths 定义了哪些路径被预渲染，搭配动态路由和 getStaticProps，获取路径参数，请求数据传给页面。
+
+- 增量静态再生。相较于 SSG，页面内部分数据需要更新，比如博客点赞数。Next.js 提出了 ISR。当用户访问了这个页面，第一次依然是老的 HTML 内容，但是 Next.js 同时静态编译成新的 HTML 文件，当你第二次访问或者其他用户访问的时候，就会变成新的 HTML 内容了。  
+  在 getStaticProps 中添加一个 revalidate 即可。
+
+> 一个 nextjs 应用的不同页面支持各个模式的混合使用。
+
+## React Server Component
+
+SSR 的缺点在于：
+
+- SSR 的数据获取必须在组件渲染之前
+- 组件的 JavaScript 必须先加载到客户端，才能开始水合
+- 所有组件必须先水合，然后才能跟其中任意一个组件交互
+
+加载整个页面的数据，加载整个页面的 JavaScript，水合整个页面，还必须按此顺序串行执行。如果有某些部分慢了，都会导致整体效率降低。
+
+RSC 的优点在于：
+
+- RSC 提供了更细粒度的组件渲染方式，可以在组件中直接获取数据，而非像 Next.js v12 中的 SSR 顶层获取数据。
+- RSC 在服务端进行渲染，组件依赖的代码不会打包到 bundle 中，而 SSR 需要将组件的所有依赖都打包到 bundle 中。
+
+当然两者最大的区别是：
+
+SSR 是在服务端将组件渲染成 HTML 发送给客户端，而 RSC 是将组件渲染成一种特殊的格式，我们称之为 RSC Payload。这个 RSC Payload 的渲染是在服务端，但不会一开始就返回给客户端，而是在客户端请求相关组件的时候才返回给客户端，RSC Payload 会包含组件渲染后的数据和样式，客户端收到 RSC Payload 后会重建 React 树，修改页面 DOM。  
+每次 SSR 都是一个新的 HTML 页面，所以状态不会保持。但是 RSC 不同，可以多次重新获取，然后客户端根据这个特殊格式更新 UI，而不会丢失客户端状态。
