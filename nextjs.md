@@ -303,3 +303,13 @@ RSC 的优点在于：
 
 SSR 是在服务端将组件渲染成 HTML 发送给客户端，而 RSC 是将组件渲染成一种特殊的格式，我们称之为 RSC Payload。这个 RSC Payload 的渲染是在服务端，但不会一开始就返回给客户端，而是在客户端请求相关组件的时候才返回给客户端，RSC Payload 会包含组件渲染后的数据和样式，客户端收到 RSC Payload 后会重建 React 树，修改页面 DOM。  
 每次 SSR 都是一个新的 HTML 页面，所以状态不会保持。但是 RSC 不同，可以多次重新获取，然后客户端根据这个特殊格式更新 UI，而不会丢失客户端状态。
+
+# 工程
+
+## 构建
+
+> 必须拷贝静态资源，因为 Next.js 的静态资源是放在 .next/static 目录下的，而 standalone 模式下，静态资源是放在 .next/standalone/.next/static 目录下的，所以需要拷贝过去。
+
+```bash
+cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public
+```

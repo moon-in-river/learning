@@ -53,6 +53,12 @@ github、gitlab 这些 git 仓库服务商提供的功能，方便对 merge 的�
 - HEAD 领先目标 commit，啥也不做
 - fast-forward，HEAD 落后目标 commit，将 HEAD 快速移动指向目标 commit
 
+#### 强制创建合并提交
+当前分支是目标分支的祖先，那么 merge 只是将指针移动，也就是进行 ff（fast-forward）。不利于保留完整的合并历史记录，多人协作或者复杂项目回溯、分析。
+```bash
+git merge --no--ff origin-branch
+```
+
 ### rebase
 
 与 merge 不同，rebase 将当前分支从分叉起到目标 commit 间的 commit 记录线性整合到目标分支上，具体操作就是将当前分支的 commit 记录依次追加到目标分支的 commit 记录里。
