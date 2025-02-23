@@ -59,17 +59,41 @@ props 遵守单向绑定原则，更新后的数据从父组件流向子组件�
 
 > props 变化的时机要考虑到，不然使用 props 的时候会出现值不符合预期的情况。
 
-- props 作为初始值的话，父组件传递的 prop 初值就要确定；否则应该使用
-- computed 创建一个计算属性，跟踪 props 值的变化；如果要可写这个数据，应该
-- 子组件创建一个响应性数据，再用 watch 跟踪 props 值，自定义重写响应性数据的逻辑
+- 直接用 props
+- 使用 computed 根据 props 做些简单调整
+- 用来初始化子组件内的响应性数据
+  > 需要注意：props 是会变化的，如果要用来初始化内部的状态，父组件传递 props 时要明确值后续还有没有变化。
+  ```vue
+  <!-- 一开始 data 为空，3秒后值变化 -->
+  <Child :data="msg" />
+  <script setup>
+  const msg = ref("");
+  setTimeout(() => {
+    msg.value = "3秒后";
+  }, 3 * 1000);
+  </script>
+  ```
 
 #### prop 校验
 
 支持 2 种方式校验：
 
-- 对象语法，可以设置基础类型、多种可能类型、默认值（基础类型、对象、函数）、必传
+- 对象语法，可以设置基础类型、多种可能类型、默认值（基础类型、对象、函数）、必传、自定义校验函数
 - 标注类型
   > 不能同时使用对象语法和标注类型声明，会导致编译错误
+
+#### Boolean 类型转换
+```vue
+<!-- 等同于传入 :disabled="true" -->
+<MyComponent disabled />
+```
+当同时允许 String 和 Boolean 时，有一种边缘情况——只有当 Boolean 出现在 String 之前时，Boolean 转换规则才适用：
+```ts
+// disabled 将被解析为空字符串 (disabled="")
+defineProps({
+  disabled: [String, Boolean]
+})
+```
 
 ### 事件
 
