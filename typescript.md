@@ -35,3 +35,17 @@ Flatten 辅助工具类型，将交叉对象类型展开合并为单层对象。
 React 使用 ts 时应多关注事件类型、样式类型。
 扩展：Parcel 是一个 bundler,零配置构建工具。
 Ts 中独有的装饰器，实际上就是个函数，有 5 个应用场景， 类、方法、访问符、属性、参数。
+
+#### isolated declarations
+
+为啥官网又是 isolated modules?
+
+babel 等转译器有限制，一次只能处理一个文档。不是基于整个文件系统的理解来进行转译。
+ts(transpileModule api) 同样有这样的限制。导致一些运行时错误发生。例如：
+
+- export 没有值的修饰符，单文件类型的转译器并不知道导出的是值还是类型
+- 非模块文件不能用 namespace，除非 export {} 声明是一个模块
+- 引用枚举常量的成员参与计算
+> @2025/3/1 TODO: 没遇到过这些报错，如何复现看看？
+
+设置 isolatedDeclarations 选项，可以解决这些问题。
