@@ -1,5 +1,52 @@
 ## 基础
 
+#### 事件处理器
+
+在模板里有 2 种赋值方式：
+
+- 内联事件处理器
+
+```html
+<div @click="count++"></div>
+<div @click="countPlus()"></div>
+<!-- $event 就是原生事件对象 -->
+<div @click="countPlus($event)"></div>
+<!-- 使用箭头函数传递原生事件对象 -->
+<div @click="(event) => countPlus(event)"></div>
+```
+
+- 方法事件处理器
+
+```html
+<!-- countPlus 第一个入参就是 event 事件对象 -->
+<div @click="countPlus"></div>
+```
+
+事件修饰符，避免了在事件处理器函数内部调用事件相关的 api，更专注数据逻辑。  
+有以下修饰符，支持链式书写：
+
+- .stop，阻止事件传递
+- .prevent，阻止元素及子元素的事件默认行为
+  > 事件默认是冒泡触发的，因此子元素的也会被阻止  
+  > submit.prevent 就不会发起请求  
+  > a 标签 click.prevent 就不会跳转
+- .self，只处理元素自身的事件
+- .once，只处理一次
+- .capture，在捕获阶段处理该事件
+- .passive，立即执行事件的默认行为
+  > 不应该和 .prevent 同用，.prevent 会被忽略并警告
+
+还支持按键修饰符、系统按键修饰符、鼠标修饰符
+
+> .exact 用于精确控制事件触发条件
+
+```html
+<!-- 没有按下任何按键的时候触发 -->
+<button @click.exact="count++"></button>
+<!-- 仅按下 ctrl 按键的时候触发 -->
+<button @click.ctrl.exact="count++"></button>
+```
+
 #### 列表渲染
 
 在 vue 里 in、of 功能是一样的。但是参考 js 里的用法，in 遍历对象，of 遍历数组、字符串。
