@@ -379,12 +379,24 @@ v-model 除了.lazy、.number、.trim 修饰符，还支持自定义修饰符。
 
 ### 透传属性
 
-- 使用 v-bind="$attrs" 透传属性
-- setup script 中用 useAttrs 获取透传属性
+传递给一个组件，没有被组件声明为 props、emits 的属性和事件监听器。  
+没有被声明为 props 的属性，会被透传给组件的根元素。  
+组件根元素上相同的属性会自动合并，包括事件监听器。
 
-> attrs 包含组件声明外的所有属性，保留原始大小写  
-> v-model、class、style 等指令默认透传  
-> Vue3 中，\$listeners 已经被废弃了，\$listeners 和\$attrs 都被合并到了\$attrs 中
+不想透传给组件根元素，需要声明 inheritAttrs 为 false。有 2 种方式：
+
+- 使用 defineOptions
+- 使用 options 选项
+
+禁用自动透出到组件根元素后，就可以应用在其他元素上：
+
+- 在模板中使用 $attrs 传递给其他元素
+- 在 setup script 中使用 useAttrs 获取透传属性
+- 在 setup(props, ctx) 中使用 ctx.attrs 获取透传属性
+
+  > $attrs 包含组件声明外的所有属性，保留原始大小写  
+  > v-model、class、style 等指令默认透传  
+  > Vue3 中，\$listeners 已经被废弃了，\$listeners 和\$attrs 都被合并到了\$attrs 中
 
 ## 封装组件
 
@@ -394,6 +406,6 @@ v-model 除了.lazy、.number、.trim 修饰符，还支持自定义修饰符。
 - 新建响应式变量，使用 watch 监听，当父组件状态变化时，更新响应式变量
 - toRef 或 toRefs 将 props 的属性转换为响应式变量
 
-> 以上都是父组件->子组件单向同步
+  > 以上都是父组件->子组件单向同步
 
 - defineModel 将 v-model 接收的值转换为响应式变量，并且子组件内修改，会同步到父组件
