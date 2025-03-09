@@ -136,6 +136,70 @@ watchEffect 自动收集回调函数里的响应性状态。
   > 何时执行回调，创建的时候？
 - 不会递归监听对象的属性
 
+#### 组件基础
+
+```vue
+<!-- 单文件组件SFC -->
+<script setup>
+import { ref } from "vue";
+
+const count = ref(0);
+</script>
+
+<template>
+  <button @click="count++">You clicked me {{ count }} times.</button>
+</template>
+```
+
+会被翻译成 js 对象
+
+```js
+import { ref } from "vue";
+
+// 默认导出组件对象
+export default {
+  setup() {
+    const count = ref(0);
+    return { count };
+  },
+  template: `
+    <button @click="count++">
+      You clicked me {{ count }} times.
+    </button>`,
+  // 也可以针对一个 DOM 内联模板：
+  // template: '#my-template-element'
+};
+// js 文件内可以具名导出多个 组件对象
+```
+
+有 3 种方式使用组件：
+
+- import 导入单文件组件，无法注册
+- 全局注册，可以是 SFC 或者组件对象
+  > 有 2 个缺点：过多使用导致逻辑不清晰；始终会被打包，无法被 tree-shaking。
+- 局部注册，没有使用 SFC 的场景，可以使用 components 选项
+  > 缺点：无法被后代组件使用。
+
+命名组件的 2 种格式：
+
+- 使用 SFC 或组件对象的字符串模板时，最好都用大驼峰格式。
+- 在 DOM 中，要使用短横线连字符格式。
+
+  > 什么是在 DOM 中书写模板？2025/3/8  
+  > 意思是在 html 里直接用 vue 的模板语法。
+
+为什么在 DOM 中，要使用短横线连字符格式？  
+因为 html 解析方式和 vue 的模板解析方式不同：
+
+- html 不区分大小写，会将大写都转换成小写
+- 只有部分标签可以用闭合标签
+- 某些标签元素对放在其中的元素类型有限制，不符合类型的不会显示
+
+动态组件 is 属性支持 2 种值：
+
+- 被注册组件的组件名
+- 组件对象
+
 ## 响应式
 
 #### toRef
