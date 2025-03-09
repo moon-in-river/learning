@@ -363,7 +363,19 @@ defineEmits<{
 >
 > 事件校验。对象语法声明时，可以编写逻辑用来校验是否触发事件。
 
-## 封装组件
+### 组件 v-model
+
+v-model 有 2 种用法:
+
+- v-model="msg"
+- v-model:msg="msg"
+
+v-model 的本质是：
+
+- 将值通过 modelValue props 传递给组件
+- 监听组件的 update:modelValue 事件，再更新值
+
+v-model 除了.lazy、.number、.trim 修饰符，还支持自定义修饰符。https://cn.vuejs.org/guide/components/v-model.html#handling-v-model-modifiers
 
 ### 透传属性
 
@@ -373,6 +385,8 @@ defineEmits<{
 > attrs 包含组件声明外的所有属性，保留原始大小写  
 > v-model、class、style 等指令默认透传  
 > Vue3 中，\$listeners 已经被废弃了，\$listeners 和\$attrs 都被合并到了\$attrs 中
+
+## 封装组件
 
 ### 子组件同步父组件状态
 
