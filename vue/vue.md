@@ -398,6 +398,47 @@ v-model 除了.lazy、.number、.trim 修饰符，还支持自定义修饰符。
   > v-model、class、style 等指令默认透传  
   > Vue3 中，\$listeners 已经被废弃了，\$listeners 和\$attrs 都被合并到了\$attrs 中
 
+### 插槽
+
+父组件通过插槽将模板传递给子组件。模板位于父组件，无法访问子组件的数据。
+
+具名插槽怎么用？
+
+```vue
+<!-- 父组件 -->
+<Child>
+  <template v-slot:header>...</template>
+  <!-- v-slot 简写 -->
+  <template #header>...</template>
+</Child>
+<!-- 子组件 -->
+<ChildRootEl>
+  <slot name="header"></slot>
+</ChildRootEl>
+```
+
+条件插槽就是可以访问 $slots.default 和其他具名插槽属性，在模板里搭配 v-if 使用。
+
+作用域插槽可以让模板访问子组件的数据。此时的模板相当于一个函数，传递给子组件，子组件将数据通过参数传递给模板，就可以在父组件里使用。
+怎么用？
+
+```html
+<!-- 子组件 -->
+<div>
+  <!-- 像传递 props 一样写 -->
+  <slot :data1="data1" :data2="data2"></slot>
+  <slot name="header" :data1="data1" :data2="data2"></slot>
+</div>
+<!-- 父组件 -->
+<!-- 只有一个默认作用域插槽的情况，在子组件上用 v-slot 命令 -->
+<Child v-slot="{data1," data2}></Child>
+<!-- 多个插槽的情况，得用 template 标签加具名 -->
+<Child>
+  <template #header="{data1," data2}></template>
+  <template #default="{data1," data2}></template>
+</Child>
+```
+
 ## 封装组件
 
 ### 子组件同步父组件状态
