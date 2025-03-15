@@ -138,6 +138,8 @@ watchEffect 自动收集回调函数里的响应性状态。
 
 #### 组件基础
 
+SFC 是 vue 提供的一种文件格式，将 html、js、css 代码内聚到一个文件中，和传统将 html、js、css 放在不同文件中的模式不同。再通过 SFC 模式组合视图。
+
 ```vue
 <!-- 单文件组件SFC -->
 <script setup>
@@ -450,3 +452,35 @@ v-model 除了.lazy、.number、.trim 修饰符，还支持自定义修饰符。
   > 以上都是父组件->子组件单向同步
 
 - defineModel 将 v-model 接收的值转换为响应式变量，并且子组件内修改，会同步到父组件
+
+## 工程相关
+
+### 工具链
+
+- vite（配套 @vitejs/plugin-vue），提供了 vite playground
+- vue cli
+- 运行时 vue 构建文件
+
+ide 推荐 vscode + vue-official 扩展。
+
+vue devtools 提供了：
+
+- 谷歌浏览器扩展程序
+- vitejs 插件
+- electron 插件
+
+测试一般用：
+
+- cypress e2e 测试
+- vitest
+- jest，只推荐从 jest 迁移的项目
+
+代码规范需要：
+
+- vite 搭配 eslint-plugin-vue 依赖
+- eslint ide 插件
+- lint-staged 工具
+- vue-official ide 插件，prettier 都可以不用了
+
+自定义块，除了 template、script、style 之前自定义的块，可以放这些内容：国际化、路由、测试等等。  
+需要通过 vite、vue cli 添加处理规则。
