@@ -136,6 +136,72 @@ watchEffect 自动收集回调函数里的响应性状态。
   > 何时执行回调，创建的时候？
 - 不会递归监听对象的属性
 
+#### 组件基础
+
+SFC 是 vue 提供的一种文件格式，将 html、js、css 代码内聚到一个文件中，和传统将 html、js、css 放在不同文件中的模式不同。再通过 SFC 模式组合视图。
+
+```vue
+<!-- 单文件组件SFC -->
+<script setup>
+import { ref } from "vue";
+
+const count = ref(0);
+</script>
+
+<template>
+  <button @click="count++">You clicked me {{ count }} times.</button>
+</template>
+```
+
+会被翻译成 js 对象
+
+```js
+import { ref } from "vue";
+
+// 默认导出组件对象
+export default {
+  setup() {
+    const count = ref(0);
+    return { count };
+  },
+  template: `
+    <button @click="count++">
+      You clicked me {{ count }} times.
+    </button>`,
+  // 也可以针对一个 DOM 内联模板：
+  // template: '#my-template-element'
+};
+// js 文件内可以具名导出多个 组件对象
+```
+
+有 3 种方式使用组件：
+
+- import 导入单文件组件，无法注册
+- 全局注册，可以是 SFC 或者组件对象
+  > 有 2 个缺点：过多使用导致逻辑不清晰；始终会被打包，无法被 tree-shaking。
+- 局部注册，没有使用 SFC 的场景，可以使用 components 选项
+  > 缺点：无法被后代组件使用。
+
+命名组件的 2 种格式：
+
+- 使用 SFC 或组件对象的字符串模板时，最好都用大驼峰格式。
+- 在 DOM 中，要使用短横线连字符格式。
+
+  > 什么是在 DOM 中书写模板？2025/3/8  
+  > 意思是在 html 里直接用 vue 的模板语法。
+
+为什么在 DOM 中，要使用短横线连字符格式？  
+因为 html 解析方式和 vue 的模板解析方式不同：
+
+- html 不区分大小写，会将大写都转换成小写
+- 只有部分标签可以用闭合标签
+- 某些标签元素对放在其中的元素类型有限制，不符合类型的不会显示
+
+动态组件 is 属性支持 2 种值：
+
+- 被注册组件的组件名
+- 组件对象
+
 ## 响应式
 
 #### toRef
@@ -299,16 +365,83 @@ defineEmits<{
 >
 > 事件校验。对象语法声明时，可以编写逻辑用来校验是否触发事件。
 
-## 封装组件
+### 组件 v-model
+
+v-model 有 2 种用法:
+
+- v-model="msg"
+- v-model:msg="msg"
+
+v-model 的本质是：
+
+- 将值通过 modelValue props 传递给组件
+- 监听组件的 update:modelValue 事件，再更新值
+
+v-model 除了.lazy、.number、.trim 修饰符，还支持自定义修饰符。https://cn.vuejs.org/guide/components/v-model.html#handling-v-model-modifiers
 
 ### 透传属性
 
-- 使用 v-bind="$attrs" 透传属性
-- setup script 中用 useAttrs 获取透传属性
+传递给一个组件，没有被组件声明为 props、emits 的属性和事件监听器。  
+没有被声明为 props 的属性，会被透传给组件的根元素。  
+组件根元素上相同的属性会自动合并，包括事件监听器。
 
-> attrs 包含组件声明外的所有属性，保留原始大小写  
-> v-model、class、style 等指令默认透传  
-> Vue3 中，\$listeners 已经被废弃了，\$listeners 和\$attrs 都被合并到了\$attrs 中
+不想透传给组件根元素，需要声明 inheritAttrs 为 false。有 2 种方式：
+
+- 使用 defineOptions
+- 使用 options 选项
+
+禁用自动透出到组件根元素后，就可以应用在其他元素上：
+
+- 在模板中使用 $attrs 传递给其他元素
+- 在 setup script 中使用 useAttrs 获取透传属性
+- 在 setup(props, ctx) 中使用 ctx.attrs 获取透传属性
+
+  > $attrs 包含组件声明外的所有属性，保留原始大小写  
+  > v-model、class、style 等指令默认透传  
+  > Vue3 中，\$listeners 已经被废弃了，\$listeners 和\$attrs 都被合并到了\$attrs 中
+
+### 插槽
+
+父组件通过插槽将模板传递给子组件。模板位于父组件，无法访问子组件的数据。
+
+具名插槽怎么用？
+
+```vue
+<!-- 父组件 -->
+<Child>
+  <template v-slot:header>...</template>
+  <!-- v-slot 简写 -->
+  <template #header>...</template>
+</Child>
+<!-- 子组件 -->
+<ChildRootEl>
+  <slot name="header"></slot>
+</ChildRootEl>
+```
+
+条件插槽就是可以访问 $slots.default 和其他具名插槽属性，在模板里搭配 v-if 使用。
+
+作用域插槽可以让模板访问子组件的数据。此时的模板相当于一个函数，传递给子组件，子组件将数据通过参数传递给模板，就可以在父组件里使用。
+怎么用？
+
+```html
+<!-- 子组件 -->
+<div>
+  <!-- 像传递 props 一样写 -->
+  <slot :data1="data1" :data2="data2"></slot>
+  <slot name="header" :data1="data1" :data2="data2"></slot>
+</div>
+<!-- 父组件 -->
+<!-- 只有一个默认作用域插槽的情况，在子组件上用 v-slot 命令 -->
+<Child v-slot="{data1," data2}></Child>
+<!-- 多个插槽的情况，得用 template 标签加具名 -->
+<Child>
+  <template #header="{data1," data2}></template>
+  <template #default="{data1," data2}></template>
+</Child>
+```
+
+## 封装组件
 
 ### 子组件同步父组件状态
 
@@ -316,6 +449,38 @@ defineEmits<{
 - 新建响应式变量，使用 watch 监听，当父组件状态变化时，更新响应式变量
 - toRef 或 toRefs 将 props 的属性转换为响应式变量
 
-> 以上都是父组件->子组件单向同步
+  > 以上都是父组件->子组件单向同步
 
 - defineModel 将 v-model 接收的值转换为响应式变量，并且子组件内修改，会同步到父组件
+
+## 工程相关
+
+### 工具链
+
+- vite（配套 @vitejs/plugin-vue），提供了 vite playground
+- vue cli
+- 运行时 vue 构建文件
+
+ide 推荐 vscode + vue-official 扩展。
+
+vue devtools 提供了：
+
+- 谷歌浏览器扩展程序
+- vitejs 插件
+- electron 插件
+
+测试一般用：
+
+- cypress e2e 测试
+- vitest
+- jest，只推荐从 jest 迁移的项目
+
+代码规范需要：
+
+- vite 搭配 eslint-plugin-vue 依赖
+- eslint ide 插件
+- lint-staged 工具
+- vue-official ide 插件，prettier 都可以不用了
+
+自定义块，除了 template、script、style 之前自定义的块，可以放这些内容：国际化、路由、测试等等。  
+需要通过 vite、vue cli 添加处理规则。
