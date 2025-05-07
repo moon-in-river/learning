@@ -1,8 +1,8 @@
-## 基础
-
 #### 响应式系统
 
 响应式变量会被组件、侦听器、计算属性追踪，响应式变量变化时会触发所有追踪了它的组件、侦听器、计算属性。
+
+markRaw，将一个对象标记为不可被转为代理。将 \_\_v_skip 属性设置为 true。后续对 markRaw 的返回值进行响应式都不会被代理。
 
 #### 表单输入绑定
 
@@ -202,6 +202,47 @@ export default {
 - 被注册组件的组件名
 - 组件对象
 
+#### css 功能
+
+##### CSS Modules
+
+被编译为 css class，并暴露到组件的 $style 对象上。并通过哈希化来避免冲突。
+
+```html
+<style module></style>
+<style module="classes">
+  .red {
+    color: red;
+  }
+</style>
+<div :class="classes.red"></div>
+```
+
+可以在 setup() 或 script setup 中使用 useCssModule 访问注入的 css。
+
+##### css 中使用 v-bind
+
+在 setup() 里可以这样用：
+
+```html
+<script>
+  export default {
+    setup() {
+      data() {
+        return {
+          color: 'red'
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .red {
+    color: v-bind(color);
+  }
+</style>
+```
+
 ## 响应式
 
 #### toRef
@@ -235,8 +276,6 @@ toRef 会返回一个响应性变量，这个变量和入参是双向绑定的�
 toRefs 入参只接收响应式对象，并返回一个普通对象，将入参可枚举的属性转换为响应式变量挂到返回的对象上。
 
 > 从组合式函数中返回的时候，可以用解构并且不丢失响应性。
-
-# 进阶
 
 ## 组件
 
