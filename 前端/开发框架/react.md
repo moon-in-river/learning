@@ -1,3 +1,9 @@
+# API
+
+## memo
+
+传入一个组件，返回一个新的组件，只要 state、props、context 不变化就不会重新渲染组件。
+
 # 钩子
 
 ## useCallback
@@ -18,6 +24,6 @@ useEffect(() => {...}, deps)
 useEffect(() => { ... return () => {}}, deps)
 ```
 
-# 性能
+# 性能监控
 
 TODO: 渲染性能 profile api，https://legacy.reactjs.org/docs/profiler.html
