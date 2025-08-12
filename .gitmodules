@@ -1,3 +1,11 @@
 [submodule "vue/core"]
 	path = vue/core
 	url = git@github.com:moon-in-river/vue-core.git
+[submodule "前端/开发框架/前端/开发框架/learnVue3"]
+	path = 前端/开发框架/前端/开发框架/learnVue3
+	url = git@github.com:moon-in-river/learnVue3.git
+	branch = main
+[submodule "前端/开发框架/vue"]
+	path = 前端/开发框架/vue
+	url = git@github.com:moon-in-river/learnVue3.git
+	branch = main

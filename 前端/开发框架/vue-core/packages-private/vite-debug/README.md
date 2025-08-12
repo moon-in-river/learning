@@ -1,1 +1,0 @@
-This package is used for debugging issues that are related to `@vitejs/plugin-vue`, or can only be reproduced in a Vite-based setup. It aims to be as close to production as possible so Vue packages are resolved to the dist files instead of source.
